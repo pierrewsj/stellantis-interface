@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&amp;display=swap" rel="stylesheet"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Stellantis - Menu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cor-fundo: #0b1d30;
+      --cor-caixa: #1c2b3d;
+      --cor-primaria: #00d2ff;
+      --cor-texto: #ffffff;
+      --fonte: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #0a0f1c;
+      background-image: radial-gradient(circle at top left, #1b2735, #090a0f);
+      color: var(--cor-texto);
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 400px;
+      width: 90%;
+      background: rgba(28,43,61,0.95);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,255,255,0.15), inset 0 0 10px rgba(0,255,255,0.05);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.6s ease-in-out;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.8rem;
+      letter-spacing: 6px;
+      background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(0,210,255,0.5);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #00d2ff;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
+    }
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+      color: #ffffff;
+      border: 1px solid #00d2ff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-flex;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0,210,255,0.3);
+      transition: all 0.3s ease-in-out;
+      animation: glowPulse 1.8s infinite alternate;
+      margin-bottom: 1rem;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+      box-shadow: 0 0 10px rgba(0,210,255,0.45);
+      transform: scale(1.05);
+    }
+    @keyframes glowPulse {
+      from { box-shadow: 0 0 6px rgba(0,210,255,0.3); }
+      to { box-shadow: 0 0 10px rgba(0,210,255,0.45); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="tsparticles" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;"></div>
+  <script>
+    tsParticles.load("tsparticles", {
+      background: { color: { value: "#0a0f1c" } },
+      particles: {
+        number: { value: 30 },
+        color: { value: "#00d2ff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: 3 },
+        move: { enable: true, speed: 1.2, direction: "none", outModes: { default: "bounce" } }
+      },
+      interactivity: {
+        events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+        modes: { repulse: { distance: 100 } }
+      }
+    });
+  </script>
+  <div class="container">
+    <h1>STELLANTIS</h1>
+    <h2>Segurança Patrimonial</h2>
+    <button onclick="window.location.href='controle_mvm.html'">Controle de MVM</button>
+    <button onclick="window.location.href='controle_lacres.html'">Controle de Lacres</button>
+    <button onclick="window.location.href='controle_pecas_recuperadas.html'">Controle de Peças Recuperadas</button>
+    <button onclick="window.location.href='procedimentos.html'">Procedimentos</button>
+    <button onclick="localStorage.removeItem('usuario');localStorage.removeItem('registro');window.location.href='index.html';">Sair</button>
+  </div>
+<script>document.addEventListener("DOMContentLoaded",function(){const u=localStorage.getItem("usuario"),r=localStorage.getItem("registro"),c=document.getElementById("conferente");if(c){c.value=u&&r?u+" / "+r:"";}});</script></body>
+</html>
