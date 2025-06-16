@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stellantis - Controle de Lacres</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    :root {
+      --cor-fundo: #0b1d30;
+      --cor-caixa: #1c2b3d;
+      --cor-primaria: #3366ff;
+      --cor-hover: #1a4ed8;
+      --cor-texto: #ffffff;
+      --cor-alerta: #f0ad4e;
+      --cor-erro: #ff4444;
+      --fonte: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+  position: relative;
+      margin: 0;
+      font-family: var(--fonte);
+      background-color: #0a0f1c;
+      background-image: radial-gradient(circle at top left, #1b2735, #090a0f);
+      color: var(--cor-texto);
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: auto;
+      background: rgba(28, 43, 61, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(0,212,255,0.15);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 10px rgba(0,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.6s ease-in-out;
+      backdrop-filter: blur(10px);
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: var(--cor-texto);
+      letter-spacing: 2px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: var(--cor-texto);
+      opacity: 0.85;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: var(--cor-primaria);
+      opacity: 0.85;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      margin-top: 0.5rem;
+    }
+
+    input, select {
+      margin-top: 0.4rem;
+      padding: 0.7rem;
+      border: 1px solid #00d2ff44;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+      box-shadow: inset 0 0 8px rgba(0, 210, 255, 0.1);
+      transition: all 0.2s ease-in-out;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid #00d2ff;
+      box-shadow: 0 0 6px #00d2ff;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    button {
+      background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+      color: #ffffff;
+      border: 1px solid #00d2ff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+      transition: all 0.3s ease-in-out; box-shadow: 0 0 6px #00d2ff66, 0 0 10px #00d2ff33; animation: glowPulse 1.8s infinite alternate;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.85);
+      transform: scale(1.05);
+    }
+
+    .auto-save-icon {
+      text-align: right;
+      font-size: 0.85rem;
+      color: #55dd55;
+    }
+
+    .info {
+      font-weight: bold;
+      text-align: center;
+      color: var(--cor-alerta);
+    }
+
+    .warning {
+      color: var(--cor-erro);
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #2e3c51;
+      padding: 0.6rem;
+      text-align: center;
+      color: var(--cor-texto);
+    }
+
+    th {
+      background: #233246;
+      color: var(--cor-primaria);
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .auto-save-icon {
+        text-align: center;
+        margin-top: 0.5rem;
+      }
+    }
+
+    @keyframes glowPulse {
+  from { box-shadow: 0 0 6px #00d2ff66, 0 0 10px #00d2ff33; }
+  to { box-shadow: 0 0 10px #00d2ff66, 0 0 15px #00d2ff44; }
+}
+
+@keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+</link></head>
+<body>
+<div id="tsparticles" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;"></div>
+<script>
+tsParticles.load("tsparticles", {
+  background: { color: { value: "#0a0f1c" } },
+  particles: {
+    number: { value: 40 },
+    color: { value: "#00d2ff" },
+    shape: { type: "circle" },
+    opacity: { value: 0.4 },
+    size: { value: 3 },
+    move: { enable: true, speed: 1.5, direction: "none", outModes: { default: "bounce" } }
+  },
+  interactivity: {
+    events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+    modes: { repulse: { distance: 100 } }
+  }
+});
+</script>
+<div style="position: fixed; top: 16px; right: 16px; z-index: 9999;">
+</div>
+<div style="position: absolute; top: 20px; right: 20px;">
+</div>
+<div class="container">
+<h1 style="font-family: 'Orbitron', sans-serif; font-size: 2.2rem; letter-spacing: 6px; background: linear-gradient(90deg, #00faff, #0077ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; text-shadow: 0 0 10px rgba(0,210,255,0.5);">
+    STELLANTIS</h1>
+<h2 style="font-size: 1.3rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: #00d2ff; opacity: 0.85; margin-top: 0.3rem;">
+Segurança Patrimonial</h2>
+<h3 style="font-size: 1.1rem; font-weight: 400; color: #ffffffcc; margin-bottom: 1rem;">
+Controle de Lacres</h3>
+<label>Setor:
+      <select id="setor">
+<option value="G08">G08</option>
+<option value="G89">G89</option>
+</select>
+</label>
+<label>Turno:
+      <select id="turno">
+<option value="1º">1º</option>
+<option value="2º">2º</option>
+<option value="3º">3º</option>
+</select>
+</label>
+<label>Número do lacre:
+      <input id="numeroLacre" type="number"/>
+<div class="warning" id="alertaRepetido"></div>
+</label>
+<label>Quantidade de lacres (máx. 100):
+      <input id="quantidadeLacres" type="number"/>
+<div class="warning" id="alertaQuantidade"></div>
+</label>
+<label>Conferente/Registro:
+      <input id="conferente" type="text"/>
+</label>
+<label>Auxiliar:
+      <input id="auxiliar" type="text"/>
+</label>
+<div class="info" id="info"></div>
+<div class="auto-save-icon">💾 Salvamento automático</div>
+<div class="button-group">
+<button onclick="adicionarLacres()">➕ Adicionar</button>
+<button onclick="gerarPlanilha()">📄 Gerar Excel</button>
+<button onclick="desfazerUltimo()">↩️ Desfazer</button>
+<button onclick="desfazerTudo()">🗑️ Desfazer Tudo</button>
+<button onclick="finalizarTurno()">✅ Finalizar Turno</button>
+</div>
+<table id="tabelaLacres">
+<thead>
+<tr>
+<th>Setor</th>
+<th>Turno</th>
+<th>N° Lacre</th>
+<th>Conferente</th>
+<th>Auxiliar</th>
+<th>Data e Hora</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<script>
+    let lacres = [];
+    try {
+      lacres = JSON.parse(localStorage.getItem("lacres") || "[]");
+    } catch (e) {
+      lacres = [];
+    }
+    let historicoAdicoes = [];
+
+    function atualizarTabela() {
+      const tbody = document.querySelector("#tabelaLacres tbody");
+      tbody.innerHTML = "";
+      lacres.forEach(item => {
+        const tr = document.createElement("tr");
+        ["setor", "turno", "numero", "conferente", "auxiliar", "dataHora"].forEach(key => {
+          const td = document.createElement("td");
+          td.textContent = item[key];
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      localStorage.setItem("lacres", JSON.stringify(lacres));
+      document.getElementById("info").textContent = lacres.length ?
+        `Último lacre: ${lacres[lacres.length - 1].numero} | Total: ${lacres.length}` : "";
+    }
+
+    function adicionarLacres() {
+      const setor = document.getElementById("setor").value;
+      const turno = document.getElementById("turno").value;
+      const numero = parseInt(document.getElementById("numeroLacre").value);
+      const qtd = parseInt(document.getElementById("quantidadeLacres").value);
+      const conferente = document.getElementById("conferente").value;
+      const auxiliar = document.getElementById("auxiliar").value;
+      const alertaRepetido = document.getElementById("alertaRepetido");
+      const alertaQuantidade = document.getElementById("alertaQuantidade");
+
+      alertaRepetido.textContent = "";
+      alertaQuantidade.textContent = "";
+
+      if (qtd > 100) {
+        alertaQuantidade.textContent = "Limite máximo de 100 lacres por vez.";
+        return;
+      }
+
+      let repetidos = [];
+      let novos = [];
+      for (let i = 0; i < qtd; i++) {
+        const n = numero + i;
+        if (lacres.find(l => l.numero === n.toString())) {
+          repetidos.push(n);
+        } else {
+          novos.push({ setor, turno, numero: n.toString(), conferente, auxiliar, dataHora: new Date().toLocaleString() });
+        }
+      }
+
+      if (repetidos.length) {
+        alertaRepetido.textContent = `Números já utilizados: ${repetidos.join(", ")}`;
+      }
+
+      lacres = lacres.concat(novos);
+      historicoAdicoes.push(novos);
+      atualizarTabela();
+      if (novos.length > 0) {
+        mostrarMensagemConfirmacao(novos.length);
+      }
+    }
+
+    function gerarPlanilha() {
+      let csv = "Setor,Turno,N° Lacre,Conferente,Auxiliar,Data e Hora\n" +
+        lacres.map(l => [l.setor, l.turno, l.numero, l.conferente, l.auxiliar, l.dataHora].join(",")).join("\n");
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lacres.csv";
+      a.click();
+      alert("Planilha gerada com sucesso");
+    }
+
+    function desfazerUltimo() {
+      if (lacres.length === 0) return;
+      const removido = lacres.pop();
+      historicoAdicoes.push([{ ...removido }]);
+      atualizarTabela();
+    }
+
+    function desfazerTudo() {
+      if (!historicoAdicoes.length) return;
+      const ultimaAcao = historicoAdicoes.pop();
+      lacres = lacres.filter(l => !ultimaAcao.find(u => u.numero === l.numero));
+      atualizarTabela();
+    }
+
+    function finalizarTurno() {
+      if (confirm("Tem certeza? Todos os dados serão apagados")) {
+        lacres = [];
+        historicoAdicoes = [];
+        localStorage.removeItem("lacres");
+        atualizarTabela();
+        document.getElementById("numeroLacre").value = "";
+        document.getElementById("quantidadeLacres").value = "";
+        document.getElementById("conferente").value = "";
+        document.getElementById("auxiliar").value = "";
+        alert("Turno finalizado com sucesso");
+      }
+    }
+
+    atualizarTabela();
+  
+// Ocultar tabela inicialmente
+document.getElementById("tabelaLacres").style.display = "none";
+
+// Adicionar botão para mostrar/ocultar a tabela
+const botaoTabela = document.createElement("button");
+botaoTabela.textContent = "📊 Mostrar Tabela";
+botaoTabela.onclick = function () {
+  const tabela = document.getElementById("tabelaLacres");
+  if (tabela.style.display === "none") {
+    tabela.style.display = "table";
+    botaoTabela.textContent = "🙈 Esconder Tabela";
+  } else {
+    tabela.style.display = "none";
+    botaoTabela.textContent = "📊 Mostrar Tabela";
+  }
+};
+document.querySelector(".button-group").appendChild(botaoTabela);
+
+// Alerta de sucesso após adicionar lacres
+function mostrarMensagemConfirmacao(qtd) {
+  const info = document.getElementById("info");
+  info.textContent = `✅ ${qtd} lacre(s) adicionado(s) com sucesso`;
+  setTimeout(() => {
+    atualizarTabela(); // restabelece texto padrão de info
+  }, 3000);
+}
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const usuario = localStorage.getItem("usuario");
+  const registro = localStorage.getItem("registro");
+  const campo = document.getElementById("conferente");
+  if (campo) {
+    campo.value = (usuario && registro) ? usuario + " / " + registro : "";
+  }
+});
+</script>
+
+<div style="position:fixed;top:16px;right:16px;z-index:9999;cursor:pointer;" onclick="localStorage.removeItem('usuario');localStorage.removeItem('registro');window.location.href='index.html';" title="Sair"><svg fill="#00d2ff" height="30" viewBox="0 0 24 24" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9z"/><path d="M20 3H10v2h10v14H10v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg></div><script>document.addEventListener("DOMContentLoaded",function(){const u=localStorage.getItem("usuario"),r=localStorage.getItem("registro"),c=document.getElementById("conferente");if(c){c.value=u&&r?u+" / "+r:"";}});</script></body>
+</html>
