@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+window.addEventListener("beforeunload", () => {
+  localStorage.setItem("pecas", JSON.stringify(pecas));
+});
+
+</script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stellantis - Controle de Peças Recuperadas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cor-fundo: #0b1d30;
+      --cor-caixa: #1c2b3d;
+      --cor-primaria: #3366ff;
+      --cor-hover: #1a4ed8;
+      --cor-texto: #ffffff;
+      --cor-alerta: #f0ad4e;
+      --cor-erro: #ff4444;
+      --fonte: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      position: relative;
+      margin: 0;
+      font-family: var(--fonte);
+      background-color: #0a0f1c;
+      background-image: radial-gradient(circle at top left, #1b2735, #090a0f);
+      color: var(--cor-texto);
+      padding: 1rem;
+    }
+    .container {
+      max-width: 920px;
+      margin: auto;
+      background: rgba(28, 43, 61, 0.6);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(0,212,255,0.15);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 10px rgba(0,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.6s ease-in-out;
+      backdrop-filter: blur(10px);
+    }
+    h1, h2, h3 { text-align: center; margin: 0; }
+    h1 {
+      font-size: 2rem;
+      color: var(--cor-texto);
+      letter-spacing: 2px;
+    }
+    h2 {
+      font-size: 1.4rem;
+      color: var(--cor-texto);
+      opacity: 0.85;
+    }
+    h3 {
+      font-size: 1.2rem;
+      color: var(--cor-primaria);
+      opacity: 0.85;
+    }
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      margin-top: 0.5rem;
+    }
+    input, select {
+      margin-top: 0.4rem;
+      padding: 0.7rem;
+      border: 1px solid #00d2ff44;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+      box-shadow: inset 0 0 8px rgba(0, 210, 255, 0.1);
+      transition: all 0.2s ease-in-out;
+    }
+    input:focus, select:focus {
+      outline: 2px solid #00d2ff;
+      box-shadow: 0 0 6px #00d2ff;
+    }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    button {
+      background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+      color: #ffffff;
+      border: 1px solid #00d2ff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 6px #00d2ff66, 0 0 10px #00d2ff33;
+      animation: glowPulse 1.8s infinite alternate;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.85);
+      transform: scale(1.05);
+    }
+    .auto-save-icon {
+      text-align: right;
+      font-size: 0.85rem;
+      color: #55dd55;
+    }
+    .info {
+      font-weight: bold;
+      text-align: center;
+      color: var(--cor-alerta);
+    }
+    .warning {
+      color: var(--cor-erro);
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid #2e3c51;
+      padding: 0.6rem;
+      text-align: center;
+      color: var(--cor-texto);
+    }
+    th {
+      background: #233246;
+      color: var(--cor-primaria);
+    }
+    .input-outros {
+      margin-top: 0.4rem;
+      padding: 0.7rem;
+      border: 1px solid #00d2ff44;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      display: none;
+      transition: all 0.2s ease-in-out;
+    }
+    .input-outros.show {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 1rem; }
+      .button-group { flex-direction: column; }
+      button { width: 100%; justify-content: center; }
+      .auto-save-icon { text-align: center; margin-top: 0.5rem; }
+    }
+    @keyframes glowPulse {
+      from { box-shadow: 0 0 6px #00d2ff66, 0 0 10px #00d2ff33; }
+      to { box-shadow: 0 0 10px #00d2ff66, 0 0 15px #00d2ff44; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+<div style="position:absolute;top:16px;right:16px;z-index:9999;cursor:pointer;" onclick="window.location.href='interface_principal.html';" title="Sair">
+  <svg fill="#00d2ff" height="30" viewBox="0 0 24 24" width="30" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 13v-2H7V8l-5 4 5 4v-3h9z"/>
+    <path d="M20 3H10v2h10v14H10v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
+  </svg>
+</div>
+
+    <h1 style="font-family: 'Orbitron', sans-serif; font-size: 2.2rem; letter-spacing: 6px; background: linear-gradient(90deg, #00faff, #0077ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; text-shadow: 0 0 10px rgba(0,210,255,0.5);">STELLANTIS</h1>
+    <h2 style="font-size: 1.3rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: #00d2ff; opacity: 0.85; margin-top: 0.3rem;">Segurança Patrimonial</h2>
+    <h3 style="font-size: 1.1rem; font-weight: 400; color: #ffffffcc; margin-bottom: 1rem;">Controle de Peças Recuperadas</h3>
+    <label>Setor:
+      <select id="setor" onchange="exibirInputOutros()">
+        <option value="Caixaria G08">Caixaria G08</option>
+        <option value="Caixaria G89">Caixaria G89</option>
+        <option value="Pátio central de Embalagens">Pátio central de Embalagens</option>
+        <option value="Jis G04 - 72">Jis G04 - 72</option>
+        <option value="Jis G04 - 73">Jis G04 - 73</option>
+        <option value="Mecanismo G04">Mecanismo G04</option>
+        <option value="Interni G89">Interni G89</option>
+        <option value="66AU G09">66AU G09</option>
+        <option value="Ilha Ecológica G38">Ilha Ecológica G38</option>
+        <option value="Pátio de Sucatas G15">Pátio de Sucatas G15</option>
+        <option value="Outros">Outros</option>
+      </select>
+      <input type="text" id="outrosSetor" class="input-outros" placeholder="Digite o nome do setor" />
+    </label>
+    <label>Turno:
+      <select id="turno">
+        <option value="1º">1º</option>
+        <option value="2º">2º</option>
+        <option value="3º">3º</option>
+      </select>
+    </label>
+    <label>Número de Desenho:
+      <input id="numeroDesenho" type="number" inputmode="numeric" pattern="\d*"/>
+      <span id="confirmIcon" style="display: none; margin-left: 0.5em;">✅</span>
+    </label>
+    <label>Descrição da Peça:
+      <input id="descricaoPeca" type="text"/>
+    </label>
+    <label>Quantidade:
+      <input id="quantidade" type="number" inputmode="numeric" pattern="\d*" min="1"/>
+    </label>
+    <label>Conferente:
+      <input id="conferente" type="text"/>
+    </label>
+    <div class="info" id="info"></div>
+    <div class="auto-save-icon">💾 Salvamento automático</div>
+    <div class="button-group">
+      <button type="button" onclick="adicionarItem()">➕ Adicionar</button>
+      <button type="button" onclick="gerarPlanilha()">📄 Gerar Excel</button>
+      <button type="button" onclick="desfazerUltimo()">↩️ Desfazer</button>
+      <button type="button" onclick="finalizarTurno()">✅ Finalizar Turno</button>
+      <button type="button" id="visualizarTabelaBtn">📊 Visualizar Tabela</button>
+    </div>
+    <table id="tabelaPecas">
+      <thead>
+        <tr>
+          <th>Setor</th>
+          <th>Turno</th>
+          <th>Conferente</th>
+          <th>N° Desenho</th>
+          <th>Descrição da Peça</th>
+          <th>Quantidade</th>
+          <th>Data e Hora</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    let pecas = [];
+try {
+  pecas = JSON.parse(localStorage.getItem("pecas") || "[]");
+} catch (e) {
+  pecas = [];
+}
+
+    function exibirInputOutros() {
+      const select = document.getElementById("setor", true);
+      const inputOutros = document.getElementById("outrosSetor", true);
+      if (select.value === "Outros") {
+        inputOutros.classList.add("show", true);
+        inputOutros.focus();
+      } else {
+        inputOutros.classList.remove("show", true);
+        inputOutros.value = "";
+      }
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector("#tabelaPecas tbody", true);
+      tbody.innerHTML = "";
+      pecas.forEach(item => {
+        const tr = document.createElement("tr", true);
+        ["setor", "turno", "conferente", "numeroDesenho", "descricaoPeca", "quantidade", "dataHora"].forEach(key => {
+          const td = document.createElement("td", true);
+          td.textContent = item[key];
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      localStorage.setItem("pecas", JSON.stringify(pecas));
+      document.getElementById("info").textContent = pecas.length ?
+        `Último Desenho: ${pecas[pecas.length - 1].numeroDesenho} | Última Peça: ${pecas[pecas.length - 1].descricaoPeca}` : "";
+    }
+
+    function adicionarItem() {
+      let setor = document.getElementById("setor").value;
+      const turno = document.getElementById("turno").value;
+      const numeroDesenho = document.getElementById("numeroDesenho").value.trim().toUpperCase();
+      const descricaoPeca = document.getElementById("descricaoPeca").value.trim();
+      const conferente = document.getElementById("conferente").value.trim();
+      const quantidadeVal = parseInt(document.getElementById("quantidade").value);
+
+      // Se "Outros" estiver selecionado, use o valor digitado
+      if (setor === "Outros") {
+        const outros = document.getElementById("outrosSetor").value.trim();
+        if (!outros) {
+          mostrarModal("Preencha o nome do setor em 'Outros'.", true);
+          document.getElementById("outrosSetor").focus();
+          return;
+        }
+        setor = outros;
+      }
+
+      if (!numeroDesenho || !descricaoPeca || !conferente || isNaN(quantidadeVal) || quantidadeVal <= 0) {
+        mostrarModal("Preencha todos os campos obrigatórios.", true);
+        return;
+      }
+      const novoItem = {
+        setor,
+        turno,
+        numeroDesenho,
+        descricaoPeca,
+        quantidade: quantidadeVal,
+        conferente,
+        dataHora: new Date().toLocaleString()
+      };
+      pecas.push(novoItem);
+      mostrarMensagemConfirmacao(numeroDesenho);
+      mostrarIconeConfirmacao();
+      atualizarTabela();
+    }
+    
+function gerarPlanilha() {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [
+    ["Setor", "Turno", "Conferente", "N° Desenho", "Descrição da Peça", "Quantidade", "Data e Hora"],
+    ...pecas.map(item => [
+      item.setor, item.turno, item.conferente, item.numeroDesenho, item.descricaoPeca, item.quantidade, item.dataHora
+    ])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws["!freeze"] = { ySplit: 1 };
+    XLSX.utils.book_append_sheet(wb, ws, "Peças Recuperadas");
+  XLSX.writeFile(wb, "controle_pecas_recuperadas.xlsx");
+alert("Planilha gerada com sucesso!");
+  mostrarModal("Planilha gerada com sucesso", true);
+}
+
+    function desfazerUltimo() {
+      if (pecas.length === 0) return;
+      pecas.pop();
+      atualizarTabela();
+    }
+    function finalizarTurno() {
+      if (confirm("Tem certeza? Todos os dados serão apagados")) {
+        pecas = [];
+        
+        localStorage.removeItem("pecas", true);
+        atualizarTabela();
+        document.getElementById("numeroDesenho").value = "";
+        document.getElementById("descricaoPeca").value = "";
+        document.getElementById("quantidade").value = "";
+        document.getElementById("conferente").value = "";
+        document.getElementById("outrosSetor").value = "";
+        document.getElementById("outrosSetor").classList.remove("show", true);
+        document.getElementById("setor").value = "Caixaria G08";
+        mostrarModal("Turno finalizado com sucesso", true);
+      }
+    }
+    function toggleTabela() {
+      const tabela = document.getElementById("tabelaPecas", true);
+      const botao = document.getElementById("visualizarTabelaBtn", true);
+      if (tabela.style.display === "none") {
+        tabela.style.display = "table";
+        botao.textContent = "🙈 Esconder Tabela";
+      } else {
+        tabela.style.display = "none";
+        botao.textContent = "📊 Visualizar Tabela";
+      }
+    }
+    function mostrarIconeConfirmacao() {
+      const icon = document.getElementById("confirmIcon", true);
+      if (icon) {
+        icon.style.display = "inline";
+        setTimeout(() => {
+          icon.style.display = "none";
+        }, 3000);
+      }
+    }
+    function mostrarMensagemConfirmacao(numeroDesenho) {
+      const info = document.getElementById("info", true);
+      info.textContent = `✅ Número de Desenho ${numeroDesenho} adicionado com sucesso`;
+      setTimeout(() => {
+        atualizarTabela();
+      }, 3000);
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+      const tabela = document.getElementById("tabelaPecas", true);
+      if (tabela) {
+        tabela.style.display = "none";
+      }
+      atualizarTabela();
+      document.getElementById("visualizarTabelaBtn").addEventListener("click", toggleTabela);
+      document.getElementById("setor").addEventListener("change", exibirInputOutros);
+    });
+  
+window.addEventListener('storage', () => {
+    if (!localStorage.getItem("usuario") || !localStorage.getItem("registro")) {
+        const campo = document.getElementById("conferente", true);
+        if (campo) campo.value = "";
+    }
+});
+
+window.addEventListener("beforeunload", () => {
+  localStorage.setItem("pecas", JSON.stringify(pecas));
+});
+
+</script>
+
+<div id="modalCustom" class="modal-custom" style="display:none;">
+  <div class="modal-content-custom">
+    <button class="close-btn-custom" onclick="fecharModalCustom()">×</button>
+    <span id="modalCustomMsg"></span>
+  </div>
+</div>
+<style>
+.modal-custom {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15,30,44,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.modal-content-custom {
+  background: #142536;
+  border-radius: 18px;
+  padding: 2.2rem 1.6rem 1.6rem 1.6rem;
+  text-align: center;
+  color: #fff;
+  min-width: 220px;
+  max-width: 90vw;
+  font-size: 1.1rem;
+  position: relative;
+}
+.modal-content-custom .close-btn-custom {
+  position: absolute; top: 8px; right: 14px;
+  background: none; border: none; color: #00d2ff;
+  font-size: 1.3rem; cursor: pointer;
+}
+.modal-content-custom .close-btn-custom:hover {
+  color: #ff4444;
+}
+</style>
+<script>
+function mostrarModal(msg, erro=false) {
+  const modal = document.getElementById("modalCustom", true);
+  const msgSpan = document.getElementById("modalCustomMsg", true);
+  modal.style.display = "flex";
+  msgSpan.textContent = msg;
+  msgSpan.style.color = erro ? "#ff4444" : "#00d2ff";
+}
+function fecharModalCustom() {
+  document.getElementById("modalCustom").style.display = "none";
+}
+
+window.addEventListener("beforeunload", () => {
+  localStorage.setItem("pecas", JSON.stringify(pecas));
+});
+
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const usuario = localStorage.getItem("usuario");
+  const registro = localStorage.getItem("registro");
+  const campoConferente = document.getElementById("conferente");
+  if (usuario && campoConferente) {
+    campoConferente.value = registro ? usuario + " / " + registro : usuario;
+  }
+});
+</script>
+</body>
+</html>
