@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Stellantis - Controle de Lacres</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --cor-fundo: #0b1d30; --cor-caixa: #1c2b3d; --cor-primaria: #3366ff; --cor-hover: #1a4ed8; --cor-texto: #ffffff; --cor-alerta: #f0ad4e; --cor-erro: #ff4444; --fonte: 'Inter', sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--fonte); background-color: var(--cor-fundo); color: var(--cor-texto); padding: 1rem; }
+    .container { max-width: 920px; margin: auto; background: var(--cor-caixa); padding: 2rem; border-radius: 20px; display: flex; flex-direction: column; gap: 1.5rem; }
+    h1, h2, h3 { text-align: center; margin: 0; }
+    h1 { font-size: 2rem; color: var(--cor-texto); letter-spacing: 2px; }
+    h2 { font-size: 1.4rem; color: var(--cor-texto); opacity: 0.85; }
+    h3 { font-size: 1.2rem; color: var(--cor-primaria); opacity: 0.85; }
+    label { font-weight: 600; font-size: 0.95rem; display: flex; flex-direction: column; margin-top: .5rem; }
+    input, select { margin-top: .4rem; padding: .7rem; border: 1px solid #3366ff33; border-radius: 8px; font-size: 1rem; background: #101d30; color: #fff; }
+    input:focus, select:focus { outline: 2px solid #3366ff; }
+    .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
+    button { background: var(--cor-primaria); color: #fff; border: none; padding: .75rem 1.5rem; border-radius: 10px; font-size: 1rem; font-weight: 600; display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; transition: background .2s; }
+    button:hover { background: var(--cor-hover); }
+    .auto-save-icon { text-align: right; font-size: .85rem; color: #55dd55; }
+    .info { font-weight: bold; text-align: center; color: var(--cor-alerta); }
+    .warning { color: var(--cor-erro); font-size: .9rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: .95rem; }
+    th, td { border: 1px solid #2e3c51; padding: .6rem; text-align: center; color: var(--cor-texto); }
+    th { background: #233246; color: var(--cor-primaria); }
+    @media (max-width: 600px) { .container { padding: 1rem; } .button-group { flex-direction: column; } button { width: 100%; justify-content: center; } .auto-save-icon { text-align: center; margin-top: .5rem; } }
+  
+@media (max-width: 600px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 400px) {
+  .container {
+    margin: 0 0.5rem;
+  }
+}
+@media (max-width: 360px) {
+  h2 {
+    font-size: 1rem;
+  }
+  button {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+</style>
+</head>
+<body>
+<div style="position:fixed;top:16px;right:16px;z-index:9999;cursor:pointer;" onclick="window.location.href='interface_principal.html';" title="Sair">
+  <svg fill="#00d2ff" height="30" viewBox="0 0 24 24" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9z"/><path d="M20 3H10v2h10v14H10v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg>
+</div>
+  <div class="container">
+    <h1 style="font-family: 'Orbitron'; font-size: 2.2rem; letter-spacing: 6px; color: #00faff; font-weight: 800;">STELLANTIS</h1>
+    <h2 style="font-size: 1.3rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: #00d2ff; opacity: .85; margin-top: .3rem;">Segurança Patrimonial</h2>
+    <h3 style="font-size: 1.1rem; font-weight: 400; color: #ffffffcc; margin-bottom: 1rem;">Controle de Lacres</h3>
+    <label>Setor:
+      <select id="setor">
+        <option>Caixaria G08</option>
+        <option>Caixaria G89</option>
+      </select>
+    </label>
+    <label>Turno:<select id="turno"><option>1º</option><option>2º</option><option>3º</option></select></label>
+    <label>Número do lacre:<input id="numeroLacre" type="number"/><div class="warning" id="alertaRepetido"></div></label>
+    <label>Quantidade de lacres (máx. 100):<input id="quantidadeLacres" type="number"/><div class="warning" id="alertaQuantidade"></div></label>
+    <label>Conferente/Registro:
+  <input id="conferente" type="text"/>
+</label>
+    <label>Auxiliar logístico:<input id="auxiliar" type="text"/></label>
+    <div class="info" id="info"></div>
+    <div class="auto-save-icon">💾 Salvamento automático</div>
+    <div class="button-group">
+      <button onclick="adicionarLacres()">➕ Adicionar</button>
+      <button onclick="gerarPlanilha()">📄 Gerar Excel</button>
+      <button onclick="desfazerUltimo()">↩️ Desfazer</button>
+      <button onclick="desfazerTudo()">🗑️ Desfazer Tudo</button>
+      <button onclick="finalizarTurno()">✅ Finalizar Turno</button>
+      <button id="toggleTableBtn" onclick="toggleTable()">👁️ Visualizar tabela</button>
+    </div>
+    <table id="tabelaLacres"><thead><tr><th>Setor</th><th>Turno</th><th>N° Lacre</th><th>Conferente</th><th>Auxiliar logístico</th><th>Data e Hora</th></tr></thead><tbody></tbody></table>
+  </div>
+
+<script>
+let lacres = JSON.parse(localStorage.getItem("lacres") || "[]");
+let actionHistory = JSON.parse(localStorage.getItem("actionHistory") || "[]");
+
+window.saveState = function () {
+  localStorage.setItem("lacres", JSON.stringify(lacres));
+  localStorage.setItem("actionHistory", JSON.stringify(actionHistory));
+};
+
+window.atualizarTabela = function () {
+  const tbody = document.querySelector("#tabelaLacres tbody");
+  tbody.innerHTML = "";
+  lacres.forEach(item => {
+    const tr = document.createElement("tr");
+    ["setor", "turno", "numeroLacre", "conferente", "auxiliar", "dataHora"].forEach(key => {
+      const td = document.createElement("td");
+      td.textContent = item[key] || "";
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  const info = document.getElementById("info");
+  info.textContent = lacres.length ? `Último lacre: ${lacres[lacres.length - 1].numeroLacre} | Total: ${lacres.length}` : "";
+};
+
+window.adicionarLacres = function () {
+  const setor = document.getElementById("setor").value;
+  const turno = document.getElementById("turno").value;
+  const inicio = Number(document.getElementById("numeroLacre").value);
+  const qtd = Number(document.getElementById("quantidadeLacres").value);
+  const conferente = document.getElementById("conferente").value;
+  const auxiliar = document.getElementById("auxiliar").value;
+  const alertaRepetido = document.getElementById("alertaRepetido");
+  alertaRepetido.textContent = "";
+
+  if (!setor || !turno || isNaN(inicio) || isNaN(qtd) || qtd < 1 || !conferente) return;
+
+  let repetido = false;
+  for (let i = 0; i < qtd; i++) {
+    let numeroAtual = String(inicio + i);
+    if (lacres.some(item => item.numeroLacre === numeroAtual)) {
+      repetido = true;
+      break;
+    }
+  }
+
+  if (repetido) {
+    alertaRepetido.textContent = "Existe(m) número(s) de lacre repetido(s)! Corrija para continuar.";
+    return;
+  }
+
+  const items = [];
+  for (let i = 0; i < qtd; i++) {
+    const item = {
+      setor,
+      turno,
+      numeroLacre: String(inicio + i),
+      conferente,
+      auxiliar,
+      dataHora: new Date().toLocaleString()
+    };
+    lacres.push(item);
+    items.push(item);
+  }
+
+  localStorage.setItem("numeroLacre", inicio);
+  localStorage.setItem("quantidadeLacres", qtd);
+  localStorage.setItem("auxiliar", auxiliar);
+
+  actionHistory.push({ type: "add", items });
+  saveState();
+  atualizarTabela();
+};
+
+window.desfazerUltimo = function () {
+  if (lacres.length === 0) return;
+  const removido = lacres.pop();
+  actionHistory.push({ type: "remove", items: [removido] });
+  saveState();
+  atualizarTabela();
+};
+
+window.desfazerTudo = function () {
+  if (actionHistory.length === 0) return;
+  const last = actionHistory.pop();
+  if (last.type === "add") {
+    lacres.splice(-last.items.length, last.items.length);
+  } else if (last.type === "remove") {
+    lacres.push(...last.items);
+  }
+  saveState();
+  atualizarTabela();
+};
+
+window.gerarPlanilha = function () {
+  if (lacres.length === 0) return;
+
+  const dados = lacres.map(item => ({
+    Setor: item.setor,
+    Turno: item.turno,
+    "N° Lacre": item.numeroLacre,
+    Conferente: item.conferente,
+    "Auxiliar logístico": item.auxiliar,
+    "Data e Hora": item.dataHora
+  }));
+
+  dados.push({
+    Setor: "",
+    Turno: "",
+    "N° Lacre": "",
+    Conferente: "",
+    "Auxiliar logístico": "TOTAL",
+    "Data e Hora": lacres.length
+  });
+
+  const ws = XLSX.utils.json_to_sheet(dados);
+  ws['!cols'] = [
+    { wch: 20 },
+    { wch: 10 },
+    { wch: 15 },
+    { wch: 25 },
+    { wch: 25 },
+    { wch: 22 }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Lacres");
+  XLSX.writeFile(wb, `lacres_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  alert("Planilha Excel gerada com sucesso!");
+};
+
+window.finalizarTurno = function () {
+  if (confirm("Confirmar finalização do turno e limpar dados?")) {
+    lacres = [];
+    actionHistory = [];
+    saveState();
+    atualizarTabela();
+    alert("Turno finalizado com sucesso!");
+
+    document.getElementById("numeroLacre").value = "";
+    document.getElementById("quantidadeLacres").value = "";
+    document.getElementById("auxiliar").value = "";
+
+    const usuario = localStorage.getItem("usuario") || "";
+    const registro = localStorage.getItem("registro") || "";
+    document.getElementById("conferente").value = usuario && registro ? `${usuario} - ${registro}` : usuario;
+  }
+};
+
+window.toggleTable = function () {
+  const tbl = document.getElementById("tabelaLacres");
+  const btn = document.getElementById("toggleTableBtn");
+  if (tbl.style.display === "none") {
+    tbl.style.display = "table";
+    btn.innerHTML = '🚫 Esconder tabela';
+  } else {
+    tbl.style.display = "none";
+    btn.innerHTML = '👁️ Visualizar tabela';
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const usuario = localStorage.getItem("usuario") || "";
+  const registro = localStorage.getItem("registro") || "";
+  document.getElementById("numeroLacre").value = localStorage.getItem("numeroLacre") || "";
+  document.getElementById("quantidadeLacres").value = localStorage.getItem("quantidadeLacres") || "";
+  document.getElementById("auxiliar").value = localStorage.getItem("auxiliar") || "";
+  document.getElementById("conferente").value = usuario && registro ? `${usuario} - ${registro}` : usuario;
+
+  atualizarTabela();
+  if (lacres.length > 0) alert("Informações restauradas");
+});
+
+window.addEventListener("beforeunload", saveState);
+</script>
+
+</body>
+</html>
